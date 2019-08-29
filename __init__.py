@@ -79,7 +79,6 @@ class ArduinoLEDControlSkill(MycroftSkill):
         actionMessage = message.data.get("actionName")
 
         led, action = makeRequest(ledMessage, actionMessage)
-        self.speak_dialog(led)
 
         if led == "all":
             resRed, resGreen, resBred, resBgreen = allLED(action)
@@ -100,8 +99,7 @@ class ArduinoLEDControlSkill(MycroftSkill):
         valueMessage = message.data.get("brightnessValue")
 
         led, action = makeRequest(ledMessage, valueMessage)
-        self.speak_dialog(led)
-
+        
         if led == "all":
             resRed, resGreen, resBred, resBgreen = allLED(action)
             if resRed.status_code == 200 and resGreen.status_code == 200 and resBred.status_code == 200 and resBgreen.status_code == 200:
