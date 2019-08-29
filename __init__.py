@@ -96,8 +96,8 @@ class ArduinoLEDControlSkill(MycroftSkill):
 
     def handle_brightness_value_intent(self, message):
 
-        ledMessage = message.date.get("ledName")
-        valueMessage = message.date.get("brightnessValue")
+        ledMessage = message.data.get("ledName")
+        valueMessage = message.data.get("brightnessValue")
 
         led, action = makeRequest(ledMessage, valueMessage)
         self.speak_dialog(led)
