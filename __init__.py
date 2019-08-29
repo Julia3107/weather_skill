@@ -99,7 +99,7 @@ class ArduinoLEDControlSkill(MycroftSkill):
         valueMessage = message.data.get("brightnessValue")
 
         led, action = makeRequest(ledMessage, valueMessage)
-        
+
         if led == "all":
             resRed, resGreen, resBred, resBgreen = allLED(action)
             if resRed.status_code == 200 and resGreen.status_code == 200 and resBred.status_code == 200 and resBgreen.status_code == 200:
