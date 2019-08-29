@@ -10,9 +10,9 @@ __author__ = "Julia"
 def makeRequest(led, action):
 
 
-    if led =="dull red":
+    if led =="tinted red":
         led = "bred"
-    elif led =="dull green":
+    elif led =="tinted green":
         led = "bgreen"
 
     if action == "on":
