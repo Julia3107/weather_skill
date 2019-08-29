@@ -20,10 +20,6 @@ def makeRequest(led, action):
     elif action == "off":
         action == "OFF"
 
-    #if led == "all":
-        #allLED(action)
-    #else:
-        #requestNormal(led, action)
 
     return led, action
 
@@ -66,18 +62,6 @@ class ArduinoLEDControlSkill(MycroftSkill):
 
     def __init__(self):
         super(ArduinoLEDControlSkill, self).__init__(name="ArduinoLEDControlSkill")
-        
-
-    # The "handle_xxxx_intent" function is triggered by Mycroft when the
-    # skill's intent is matched.  The intent is defined by the IntentBuilder()
-    # pieces, and is triggered when the user's utterance matches the pattern
-    # defined by the keywords.  In this case, the match occurs when one word
-    # is found from each of the files:
-    #
-    # In this example that means it would match on utterances like:
-    #   'Hello world'
-    #   'Howdy you great big world'
-    #   'Greetings planet earth'
 
     def initialize(self):
 
@@ -95,11 +79,12 @@ class ArduinoLEDControlSkill(MycroftSkill):
         actionMessage = message.data.get("actionName")
 
         led, action = makeRequest(ledMessage, actionMessage)
+        self.speak_dialog(led)
 
         if led == "all":
             resRed, resGreen, resBred, resBgreen = allLED(action)
             if resRed.status_code == 200 and resGreen.status_code == 200 and resBred.status_code == 200 and resBgreen.status_code == 200:
-                self.speak_dialog("OnOff", {"name": ledMessage, "status": actionMessage})
+                self.speak_dialog("allOnOff", {"name": ledMessage, "status": actionMessage})
             else:
                 self.speak_dialog("request.fail")
         else:
@@ -115,11 +100,12 @@ class ArduinoLEDControlSkill(MycroftSkill):
         valueMessage = message.date.get("brightnessValue")
 
         led, action = makeRequest(ledMessage, valueMessage)
+        self.speak_dialog(led)
 
         if led == "all":
             resRed, resGreen, resBred, resBgreen = allLED(action)
             if resRed.status_code == 200 and resGreen.status_code == 200 and resBred.status_code == 200 and resBgreen.status_code == 200:
-                self.speak_dialog("Dim", {"name": ledMessage, "status": valueMessage})
+                self.speak_dialog("allDim", {"name": ledMessage, "status": valueMessage})
             else:
                 self.speak_dialog("request.fail")
         else:
