@@ -5,8 +5,9 @@ from mycroft.util.log import LOG
 
 import requests
 
-__author__ = "Julia"
+__author__ = "Julia Albert"
 
+# Funktion zur Formulierung des Requests (LED-Namen und Aktionsbezeichnung anpassen)
 def makeRequest(led, action):
 
 
@@ -23,6 +24,7 @@ def makeRequest(led, action):
 
     return led, action
 
+# Extrafunktion die alle LEDs "gleichzeitig" bedienen kann
 def allLED(action):
     urlRed = "http://192.168.178.29/rest/items/red"
     urlGreen = "http://192.168.178.29/rest/items/green"
@@ -47,6 +49,7 @@ def allLED(action):
 
     return responseRed, responseGreen, responseBred, responseBgreen
 
+# Funktion, die Request zusammensetzt und absendet
 def requestNormal(led, action):
         url = "http://192.168.178.29/rest/items/" + led
 
@@ -58,11 +61,14 @@ def requestNormal(led, action):
         return response
 
 
+# Skillklasse
 class ArduinoLEDControlSkill(MycroftSkill):
 
+    # Konstruktor
     def __init__(self):
         super(ArduinoLEDControlSkill, self).__init__(name="ArduinoLEDControlSkill")
 
+    # Intents definieren
     def initialize(self):
 
         # Intent on/off
@@ -73,13 +79,17 @@ class ArduinoLEDControlSkill(MycroftSkill):
         brightness_value_intent = IntentBuilder("Brightness_Value_Intent").require("action").require("ledName").require("brightnessValue").build()
         self.register_intent(brightness_value_intent, self.handle_brightness_value_intent)
 
+    # Intent-handler für An- oder Ausschalten defininieren
     def handle_on_off_intent(self, message):
 
+        # Variablen an Unserinput (Spracheingabe) anpassen
         ledMessage = message.data.get("ledName")
         actionMessage = message.data.get("actionName")
 
+        # Request formulieren
         led, action = makeRequest(ledMessage, actionMessage)
 
+        # Request(s) senden und Sprachausgabe machen
         if led == "all":
             resRed, resGreen, resBred, resBgreen = allLED(action)
             if resRed.status_code == 200 and resGreen.status_code == 200 and resBred.status_code == 200 and resBgreen.status_code == 200:
@@ -93,6 +103,7 @@ class ArduinoLEDControlSkill(MycroftSkill):
             else:
                 self.speak_dialog("request.fail")
 
+    # Intent-handler für bestimmte Helligkeitswerte (Vorgehensweise s.o.)
     def handle_brightness_value_intent(self, message):
 
         ledMessage = message.data.get("ledName")
@@ -113,10 +124,10 @@ class ArduinoLEDControlSkill(MycroftSkill):
             else:
                 self.speak_dialog("request.fail")
 
-
+    # Ausführung bei Stop-Intent (hier keine Funktion)
     def stop(self):
         pass
 
-
+# Skill erstellen
 def create_skill():
     return ArduinoLEDControlSkill()
