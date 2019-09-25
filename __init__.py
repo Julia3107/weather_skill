@@ -3,81 +3,38 @@ from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill, intent_handler
 from mycroft.util.log import LOG
 
+import json
 import requests
 
 __author__ = "Julia Albert"
 
-# Funktion zur Formulierung des Requests (LED-Namen und Aktionsbezeichnung anpassen)
-def makeRequest(led, action):
-
-
-    if led =="tinted red":
-        led = "bred"
-    elif led =="tinted green":
-        led = "bgreen"
-
-    if action == "on":
-        action = "ON"
-    elif action == "off":
-        action == "OFF"
-
-
-    return led, action
-
-# Extrafunktion die alle LEDs "gleichzeitig" bedienen kann
-def allLED(action):
-    urlRed = "http://192.168.178.29/rest/items/red"
-    urlGreen = "http://192.168.178.29/rest/items/green"
-    urlBgreen = "http://192.168.178.29/rest/items/bgreen"
-    urlBred = "http://192.168.178.29/rest/items/bred"
+def getWeather(location):
+    url = "http://api.worldweatheronline.com/premium/v1/weather.ashx?key=985ef9c3a7bd499587c115157192509&q=" + location + "&tp=3&num_of_days=1&cc=yes&format=json"
 
     try:
-        responseRed = requests.post(urlRed, data=action)
-        print(responseRed)
-
-        responseGreen = requests.post(urlGreen, data=action)
-        print(responseGreen)
-
-        responseBgreen = requests.post(urlBgreen, data=action)
-        print(responseBgreen)
-
-        responseBred = requests.post(urlBred, data=action)
-        print(responseBred)
+        response = requests.get(url)
 
     except KeyError:
         pass
 
-    return responseRed, responseGreen, responseBred, responseBgreen
-
-# Funktion, die Request zusammensetzt und absendet
-def requestNormal(led, action):
-        url = "http://192.168.178.29/rest/items/" + led
-
-        try:
-            response = requests.post(url, data=action)
-        except KeyError:
-            pass
-
-        return response
-
+    return response
 
 # Skillklasse
-class ArduinoLEDControlSkill(MycroftSkill):
+class WeatherSkill(MycroftSkill):
 
     # Konstruktor
     def __init__(self):
-        super(ArduinoLEDControlSkill, self).__init__(name="ArduinoLEDControlSkill")
+        super(WeatherSkill, self).__init__(name="WeatherSkill")
 
-    # Intents definieren
+    # Intent definieren
     def initialize(self):
 
         # Intent on/off
         on_off_intent = IntentBuilder("On_Off_Intent").require("action").require("ledName").require("actionName").build()
         self.register_intent(on_off_intent, self.handle_on_off_intent)
 
-        #Intent dimmer
-        brightness_value_intent = IntentBuilder("Brightness_Value_Intent").require("action").require("ledName").require("brightnessValue").build()
-        self.register_intent(brightness_value_intent, self.handle_brightness_value_intent)
+        weather_intent = IntentBuilder("Weather_Intent").require("action").require("location").build()
+        self.register_intent(weather_intent, self.handle_weather_intent)
 
     # Intent-handler für An- oder Ausschalten defininieren
     def handle_on_off_intent(self, message):
@@ -103,26 +60,28 @@ class ArduinoLEDControlSkill(MycroftSkill):
             else:
                 self.speak_dialog("request.fail")
 
-    # Intent-handler für bestimmte Helligkeitswerte (Vorgehensweise s.o.)
-    def handle_brightness_value_intent(self, message):
+    # Intent-handler für Wetter
+    def handle_weather_intent(self, message):
+        locationMessage = message.data.get("location")
 
-        ledMessage = message.data.get("ledName")
-        valueMessage = message.data.get("brightnessValue")
+        res = getWeather(locationMessage)
 
-        led, action = makeRequest(ledMessage, valueMessage)
+        if res.status_code == 200:
+            data = json.loads(res.text)
 
-        if led == "all":
-            resRed, resGreen, resBred, resBgreen = allLED(action)
-            if resRed.status_code == 200 and resGreen.status_code == 200 and resBred.status_code == 200 and resBgreen.status_code == 200:
-                self.speak_dialog("allDim", {"name": ledMessage, "status": valueMessage})
-            else:
-                self.speak_dialog("request.fail")
+            temp = data["data"]
+            temp = temp["current_condition"]
+            temp = temp[0]
+            temp = temp["weatherDesc"]
+            temp = temp[0]
+            temp = temp["value"]
+
+            weatherDesc = temp
+
+            self.speak_dialog("weather",{"location": locationMessage, "weather": weatherDesc} )
+
         else:
-            res = requestNormal(led, action)
-            if res.status_code == 200:
-                self.speak_dialog("Dim", {"name": ledMessage, "status": valueMessage})
-            else:
-                self.speak_dialog("request.fail")
+            self.speak_dialog("fail")
 
     # Ausführung bei Stop-Intent (hier keine Funktion)
     def stop(self):
@@ -130,4 +89,4 @@ class ArduinoLEDControlSkill(MycroftSkill):
 
 # Skill erstellen
 def create_skill():
-    return ArduinoLEDControlSkill()
+    return WeatherSkill()

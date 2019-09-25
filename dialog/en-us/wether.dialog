@@ -1,0 +1,2 @@
+The weather in {{location}} if {{weather}}
+Right now it is {{weather}} in {{location}}

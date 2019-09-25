@@ -1,2 +1,0 @@
-(set|turn) the (?P<ledName>.*) led to (?P<brightnessValue>.*)
-(set|turn) (?P<ledName>.*) leds to (?P<brightnessValue>.*)

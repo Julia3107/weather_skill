@@ -1,2 +1,0 @@
-turn the (?P<ledName>.*) led (?P<actionName>.*)
-turn (?P<ledName>.*) leds (?P<actionName>.*)
