@@ -1,3 +1,2 @@
-(How|What) is the (temp|climate) in (?P<location>.*)
+(How|What) is the (temperature|climate) in (?P<location>.*)
 
-Can I get a prediction for (?P<location>.*)
